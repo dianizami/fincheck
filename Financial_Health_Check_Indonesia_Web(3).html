@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0b1220" />
+  <meta name="description" content="Financial Health Check Indonesia — kalkulator kesehatan keuangan pribadi berbasis 5 indikator." />
+  <title>Financial Health Check Indonesia</title>
+  <style>
+    :root{
+      --bg:#f6f8fb; --surface:#ffffff; --surface-2:#f0f4f8; --text:#101828; --muted:#667085;
+      --border:#dfe5ec; --primary:#0b1220; --primary-2:#1d2939; --accent:#12b76a; --warning:#f79009;
+      --danger:#f04438; --critical:#b42318; --shadow:0 12px 35px rgba(16,24,40,.07); --radius:18px;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text);line-height:1.5}
+    button,input{font:inherit}
+    a{color:inherit}
+    .container{width:min(1180px,calc(100% - 32px));margin:auto}
+    .topbar{position:sticky;top:0;z-index:50;background:rgba(11,18,32,.94);backdrop-filter:blur(14px);color:#fff;border-bottom:1px solid rgba(255,255,255,.08)}
+    .topbar-inner{display:flex;align-items:center;gap:16px;min-height:64px}
+    .brand{font-weight:800;letter-spacing:-.02em;white-space:nowrap}.brand small{display:block;font-weight:500;font-size:11px;color:#98a2b3;letter-spacing:0}
+    .nav{display:flex;gap:4px;overflow:auto;padding:8px 0}.nav a{padding:8px 11px;border-radius:10px;text-decoration:none;color:#d0d5dd;font-size:13px;white-space:nowrap}.nav a:hover,.nav a.active{background:#1d2939;color:#fff}
+    .actions{margin-left:auto;display:flex;gap:8px;white-space:nowrap}
+    .btn{border:1px solid var(--border);background:var(--surface);color:var(--text);padding:9px 12px;border-radius:11px;cursor:pointer;font-weight:700}.btn:hover{transform:translateY(-1px)}
+    .btn-dark{background:#1d2939;border-color:#344054;color:#fff}.btn-ghost{background:transparent;color:#fff;border-color:#344054}.btn-danger{color:#b42318;border-color:#fecdca;background:#fff}
+    header.hero{padding:42px 0 22px;background:linear-gradient(180deg,#0b1220 0,#101828 64%,var(--bg) 100%);color:#fff}
+    .hero-grid{display:grid;grid-template-columns:1.45fr .85fr;gap:20px;align-items:end}
+    .eyebrow{font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#98a2b3;margin-bottom:9px}
+    h1{font-size:clamp(30px,5vw,54px);line-height:1.02;letter-spacing:-.045em;margin:0 0 12px}
+    .hero p{color:#d0d5dd;max-width:760px;margin:0}.hero-note{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:16px;color:#eaecf0;font-size:13px}
+    main{padding:24px 0 72px}.section{scroll-margin-top:86px;margin-bottom:24px}.section-head{display:flex;justify-content:space-between;gap:16px;align-items:end;margin:0 0 12px}.section-head h2{margin:0;font-size:24px;letter-spacing:-.02em}.section-head p{margin:0;color:var(--muted);font-size:13px}
+    .grid{display:grid;gap:16px}.grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}.grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}.grid-5{grid-template-columns:repeat(5,minmax(0,1fr))}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px}.card h3{margin:0 0 5px;font-size:17px}.muted{color:var(--muted)}
+    .kpi{padding:18px}.kpi-label{font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}.kpi-value{font-size:30px;font-weight:850;letter-spacing:-.035em;margin:4px 0}.kpi-sub{font-size:12px;color:var(--muted)}
+    .overall{display:grid;grid-template-columns:220px 1fr;gap:22px;align-items:center}.score-ring{--p:0;--ring:#12b76a;width:190px;height:190px;border-radius:50%;background:conic-gradient(var(--ring) calc(var(--p)*1%),#e8edf2 0);display:grid;place-items:center;margin:auto;position:relative}.score-ring::after{content:"";width:140px;height:140px;background:#fff;border-radius:50%;position:absolute}.score-inner{position:relative;z-index:2;text-align:center}.score-number{font-size:48px;font-weight:900;line-height:1}.score-caption{font-size:11px;color:var(--muted);margin-top:6px}.status{display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border-radius:999px;font-size:11px;font-weight:900;letter-spacing:.03em}.status.healthy{background:#ecfdf3;color:#027a48}.status.watch{background:#fffaeb;color:#b54708}.status.critical{background:#fef3f2;color:#b42318}.status.neutral{background:#f2f4f7;color:#475467}
+    .metric-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}.metric-card{padding:14px;border:1px solid var(--border);border-radius:14px;background:#fff}.metric-name{font-weight:800;font-size:12px}.metric-ratio{font-size:22px;font-weight:850;margin:5px 0}.metric-score{font-size:12px;color:var(--muted)}
+    .bar{height:8px;background:#edf1f5;border-radius:99px;overflow:hidden;margin-top:10px}.bar>span{display:block;height:100%;width:0;background:#344054;border-radius:99px;transition:width .2s ease}
+    form .form-row{display:grid;grid-template-columns:1fr 180px;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid #eef1f4}.form-row:last-child{border-bottom:0}.label{font-weight:750}.hint{display:block;color:var(--muted);font-size:12px;margin-top:2px}.input-wrap{position:relative}.input-wrap span{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--muted);font-weight:700}.input{width:100%;border:1px solid #cfd6df;background:#fff;border-radius:12px;padding:11px 11px 11px 40px;text-align:right;font-weight:800;outline:none}.input:focus{border-color:#98a2b3;box-shadow:0 0 0 4px rgba(16,24,40,.05)}
+    .result-list{display:grid;gap:11px}.result-line{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid #eef1f4}.result-line:last-child{border-bottom:0}.result-value{font-weight:850;text-align:right}.recommend{background:#f8fafc;border-left:4px solid #475467;border-radius:10px;padding:13px 14px;font-size:13px}
+    .benchmark{background:var(--surface-2);border-radius:14px;padding:14px}.benchmark table{width:100%;border-collapse:collapse;font-size:12px}.benchmark th,.benchmark td{text-align:left;padding:7px 4px;border-bottom:1px solid #dde3ea}.benchmark th{color:var(--muted)}
+    .tools{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}.footer{color:var(--muted);font-size:12px;padding:18px 0 0}.source-list{display:grid;gap:7px}.source-list a{color:#344054}
+    .hidden{display:none!important}.print-only{display:none}
+    @media (max-width:980px){.hero-grid{grid-template-columns:1fr}.grid-5,.metric-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.overall{grid-template-columns:1fr}.score-ring{width:165px;height:165px}.score-ring::after{width:122px;height:122px}}
+    @media (max-width:720px){.container{width:min(100% - 20px,1180px)}.topbar-inner{min-height:58px;align-items:center}.brand{font-size:13px}.brand small{display:none}.actions .btn:not(.btn-dark){display:none}.nav{order:3;flex:1;min-width:0}.topbar-inner{flex-wrap:wrap;padding:6px 0}.actions{margin-left:auto}.hero{padding-top:34px!important}.card{padding:16px}.grid-2,.grid-3{grid-template-columns:1fr}.grid-5,.metric-grid{grid-template-columns:1fr}.form-row{grid-template-columns:1fr!important;gap:7px!important}.input-wrap{max-width:none}.section-head{align-items:flex-start;flex-direction:column}.tools{justify-content:flex-start}.kpi-value{font-size:26px}.score-number{font-size:42px}}
+    @media print{body{background:#fff}.topbar,.hero,.tools,.nav{display:none!important}main{padding:0}.card{box-shadow:none;break-inside:avoid}.print-only{display:block}.section{margin-bottom:14px}.container{width:100%}}
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="container topbar-inner">
+      <div class="brand">Financial Health Check<small>Indonesia · personal finance screening</small></div>
+      <nav class="nav" aria-label="Navigasi utama">
+        <a href="#dashboard">Dashboard</a><a href="#cashflow">Cash Flow</a><a href="#networth">Net Worth</a><a href="#debt">Debt Ratio</a><a href="#saving">Saving Ratio</a><a href="#investment">Investment Ratio</a>
+      </nav>
+      <div class="actions"><button class="btn btn-ghost" id="printBtn">Print</button><button class="btn btn-dark" id="resetBtn">Reset</button></div>
+    </div>
+  </div>
+
+  <header class="hero">
+    <div class="container hero-grid">
+      <div>
+        <div class="eyebrow">Financial Health Check — Indonesia</div>
+        <h1>Kenali kondisi keuangan Anda dalam 5 indikator.</h1>
+        <p>Masukkan angka bulanan dan posisi aset/utang Anda. Kalkulator menghitung cash flow, net worth, debt ratio, saving ratio, investment ratio, serta skor keseluruhan secara otomatis.</p>
+      </div>
+      <div class="hero-note"><strong>Privasi:</strong> halaman ini tidak mengirim data ke server. Data disimpan di browser perangkat Anda untuk membantu melanjutkan pengisian.</div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section id="dashboard" class="section">
+      <div class="section-head"><div><h2>Dashboard</h2><p>Ringkasan otomatis dari 5 indikator.</p></div></div>
+      <div class="card overall">
+        <div class="score-ring" id="scoreRing"><div class="score-inner"><div class="score-number" id="overallScore">—</div><div class="score-caption">Financial Health Score</div></div></div>
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><div><div class="eyebrow" style="color:var(--muted);margin:0">Status keseluruhan</div><div style="font-size:24px;font-weight:900" id="overallStatus">Belum ada data</div></div><span class="status neutral" id="overallPill">BELUM ADA DATA</span></div>
+          <p class="muted" id="overallMessage" style="margin:10px 0 0">Isi pendapatan bersih dan data keuangan Anda untuk melihat hasil.</p>
+          <div class="metric-grid" style="margin-top:18px">
+            <div class="metric-card"><div class="metric-name">Cash Flow</div><div class="metric-ratio" id="dashCash">—</div><div class="metric-score" id="dashCashScore">Skor —</div><div class="bar"><span id="barCash"></span></div></div>
+            <div class="metric-card"><div class="metric-name">Net Worth</div><div class="metric-ratio" id="dashNet">—</div><div class="metric-score" id="dashNetScore">Skor —</div><div class="bar"><span id="barNet"></span></div></div>
+            <div class="metric-card"><div class="metric-name">Debt Ratio</div><div class="metric-ratio" id="dashDebt">—</div><div class="metric-score" id="dashDebtScore">Skor —</div><div class="bar"><span id="barDebt"></span></div></div>
+            <div class="metric-card"><div class="metric-name">Saving Ratio</div><div class="metric-ratio" id="dashSaving">—</div><div class="metric-score" id="dashSavingScore">Skor —</div><div class="bar"><span id="barSaving"></span></div></div>
+            <div class="metric-card"><div class="metric-name">Investment Ratio</div><div class="metric-ratio" id="dashInvestment">—</div><div class="metric-score" id="dashInvestmentScore">Skor —</div><div class="bar"><span id="barInvestment"></span></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="cashflow" class="section">
+      <div class="section-head"><div><h2>1. Cash Flow</h2><p>Surplus / defisit bulanan dan surplus ratio.</p></div></div>
+      <div class="grid grid-2">
+        <div class="card"><h3>Input bulanan</h3><p class="muted" style="font-size:12px;margin-top:0">Gunakan take-home pay dan rata-rata pengeluaran bulanan.</p><form id="cashForm">
+          <div class="form-row"><div><div class="label">Pendapatan bersih / bulan</div><span class="hint">Gaji bersih + pendapatan rutin yang benar-benar diterima.</span></div><div class="input-wrap"><span>Rp</span><input class="input money" id="income" inputmode="numeric" type="number" min="0" step="1000" value="" aria-label="Pendapatan bersih per bulan"></div></div>
+          <div class="form-row"><div><div class="label">Kebutuhan pokok</div><span class="hint">Makan, tempat tinggal, utilitas, transportasi dasar, dll.</span></div><div class="input-wrap"><span>Rp</span><input class="input money" id="basic" inputmode="numeric" type="number" min="0" step="1000" value=""></div></div>
+          <div class="form-row"><div><div class="label">Cicilan utang</div><span class="hint">KPR, kendaraan, kartu kredit, pinjaman, dan lainnya.</span></div><div class="input-wrap"><span>Rp</span><input class="input money" id="cfDebt" inputmode="numeric" type="number" min="0" step="1000" value=""></div></div>
+          <div class="form-row"><div><div class="label">Gaya hidup / rekreasi</div><span class="hint">Hiburan, dining, hobi, belanja non-esensial, dll.</span></div><div class="input-wrap"><span>Rp</span><input class="input money" id="lifestyle" inputmode="numeric" type="number" min="0" step="1000" value=""></div></div>
+          <div class="form-row"><div><div class="label">Pengeluaran lain-lain</div><span class="hint">Pengeluaran rutin lain yang belum masuk kategori di atas.</span></div><div class="input-wrap"><span>Rp</span><input class="input money" id="other" inputmode="numeric" type="number" min="0" step="1000" value=""></div></div>
+        </form></div>
+        <div class="card"><h3>Hasil</h3><div class="result-list" style="margin-top:8px"><div class="result-line"><span>Total pengeluaran</span><span class="result-value" id="cfTotal">—</span></div><div class="result-line"><span>Surplus / defisit</span><span class="result-value" id="cfSurplus">—</span></div><div class="result-line"><span>Surplus Ratio</span><span class="result-value" id="cfRatio">—</span></div><div class="result-line"><span>Status</span><span id="cfStatus" class="status neutral">BELUM ADA DATA</span></div><div class="result-line"><span>Skor</span><span class="result-value" id="cfScore">—</span></div></div><div class="recommend" style="margin-top:12px" id="cfRec">Isi pendapatan dan pengeluaran untuk melihat rekomendasi.</div><div class="benchmark" style="margin-top:14px"><table><tr><th>Status</th><th>Benchmark</th></tr><tr><td>Waspada</td><td>&lt;10% surplus</td></tr><tr><td>Sehat</td><td>10%–19,9%</td></tr><tr><td>Sangat sehat</td><td>≥20%</td></tr></table></div></div>
+      </div>
+    </section>
+
+    <section id="networth" class="section">
+      <div class="section-head"><div><h2>2. Net Worth</h2><p>Total aset dikurangi total kewajiban.</p></div></div>
+      <div class="grid grid-2">
+        <div class="card"><h3>Aset & kewajiban</h3><form>
+          <div class="form-row"><div><div class="label">Kas & tabungan</div></div><div class="input-wrap"><span>Rp</span><input class="input money" id="cash" type="number" min="0" step="1000" inputmode="numeric"></div></div>
+          <div class="form-row"><div><div class="label">Deposito / pasar uang</div></div><div class="input-wrap"><span>Rp</span><input class="input money" id="deposit" type="number" min="0" step="1000" inputmode="numeric"></div></div>
+          <div class="form-row"><div><div class="label">Investasi</div></div><div class="input-wrap"><span>Rp</span><input class="input money" id="investment" type="number" min="0" step="1000" inputmode="numeric"></div></div>
+          <div class="form-row"><div><div class="label">Rumah / properti</div></div><div class="input-wrap"><span>Rp</span><input class="input money" id="property" type="number" min="0" step="1000" inputmode="numeric"></div></div>
+          <div class="form-row"><div><div class="label">Kendaraan & aset lain</div></div><div class="input-wrap"><span>Rp</span><input class="input money" id="vehicle" type="number" min="0" step="1000" inputmode="numeric"></div></div>
+          <div class="form-row"><div><div class="label">Aset usaha lainnya</div></div><div class="input-wrap"><span>Rp</span><input class="input money" id="business" type="number" min="0" step="1000" inputmode="numeric"></div></div>
+          <div class="form-row"><div><div class="label">Sisa KPR</div></div><div class="input-wrap"><span>Rp</span><input class="input money" id="mortgage" type="number" min="0" step="1000" inputmode="numeric"></div></div>
+          <div class="form-row"><div><div class="label">Sisa pinjaman kendaraan</div></div><div class="input-wrap"><span>Rp</span><input class="input money" id="vehicleLoan" type="number" min="0" step="1000" inputmode="numeric"></div></div>
+          <div class="form-row"><div><div class="label">Kartu kredit / konsumtif</div></div><div class="input-wrap"><span>Rp</span><input class="input money" id="consumerDebt" type="number" min="0" step="1000" inputmode="numeric"></div></div>
+          <div class="form-row"><div><div class="label">Utang lainnya</div></div><div class="input-wrap"><span>Rp</span><input class="input money" id="otherDebt" type="number" min="0" step="1000" inputmode="numeric"></div></div>
+        </form></div>
+        <div class="card"><h3>Hasil</h3><div class="result-list" style="margin-top:8px"><div class="result-line"><span>Total aset</span><span class="result-value" id="nwAssets">—</span></div><div class="result-line"><span>Total kewajiban</span><span class="result-value" id="nwLiab">—</span></div><div class="result-line"><span>Net Worth</span><span class="result-value" id="nwValue">—</span></div><div class="result-line"><span>Net Worth Ratio</span><span class="result-value" id="nwRatio">—</span></div><div class="result-line"><span>Status</span><span id="nwStatus" class="status neutral">BELUM ADA DATA</span></div><div class="result-line"><span>Skor</span><span class="result-value" id="nwScore">—</span></div></div><div class="recommend" style="margin-top:12px" id="nwRec">Masukkan aset dan kewajiban untuk melihat hasil.</div><div class="benchmark" style="margin-top:14px"><table><tr><th>Status</th><th>Benchmark</th></tr><tr><td>Waspada</td><td>Net Worth Ratio &lt;30%</td></tr><tr><td>Sehat</td><td>30%–49,9%</td></tr><tr><td>Sangat sehat</td><td>≥50%</td></tr></table></div></div>
+      </div>
+    </section>
+
+    <section id="debt" class="section">
+      <div class="section-head"><div><h2>3. Debt Ratio</h2><p>Total cicilan utang bulanan ÷ pendapatan bersih.</p></div></div>
+      <div class="grid grid-2">
+        <div class="card"><h3>Input</h3><form>
+          <div class="form-row"><div><div class="label">Pendapatan bersih / bulan</div></div><div class="input-wrap"><span>Rp</span><input class="input money" id="drIncome" type="number" min="0" step="1000" inputmode="numeric"></div></div>
+          <div class="form-row"><div><div class="label">KPR / rumah per bulan</div></div><div class="input-wrap"><span>Rp</span><input class="input money" id="drMortgage" type="number" min="0" step="1000" inputmode="numeric"></div></div>
+          <div class="form-row"><div><div class="label">Kendaraan / multifinance per bulan</div></div><div class="input-wrap"><span>Rp</span><input class="input money" id="drVehicle" type="number" min="0" step="1000" inputmode="numeric"></div></div>
+          <div class="form-row"><div><div class="label">Kartu kredit + konsumtif + lainnya</div></div><div class="input-wrap"><span>Rp</span><input class="input money" id="drConsumer" type="number" min="0" step="1000" inputmode="numeric"></div></div>
+        </form></div>
+        <div class="card"><h3>Hasil</h3><div class="result-list" style="margin-top:8px"><div class="result-line"><span>Total cicilan / bulan</span><span class="result-value" id="drTotal">—</span></div><div class="result-line"><span>Debt Ratio</span><span class="result-value" id="drRatio">—</span></div><div class="result-line"><span>Status</span><span id="drStatus" class="status neutral">BELUM ADA DATA</span></div><div class="result-line"><span>Skor</span><span class="result-value" id="drScore">—</span></div></div><div class="recommend" style="margin-top:12px" id="drRec">Isi pendapatan dan cicilan untuk melihat hasil.</div><div class="benchmark" style="margin-top:14px"><table><tr><th>Status</th><th>Benchmark</th></tr><tr><td>Sangat sehat</td><td>≤20%</td></tr><tr><td>Sehat</td><td>&gt;20%–30%</td></tr><tr><td>Waspada</td><td>&gt;30%–40%</td></tr><tr><td>Kritis</td><td>&gt;40%</td></tr></table></div></div>
+      </div>
+    </section>
+
+    <section id="saving" class="section">
+      <div class="section-head"><div><h2>4. Saving Ratio</h2><p>Total tabungan rutin ÷ pendapatan bersih.</p></div></div>
+      <div class="grid grid-2">
+        <div class="card"><h3>Input</h3><form>
+          <div class="form-row"><div><div class="label">Pendapatan bersih / bulan</div></div><div class="input-wrap"><span>Rp</span><input class="input money" id="srIncome" type="number" min="0" step="1000" inputmode="numeric"></div></div>
+          <div class="form-row"><div><div class="label">Tabungan rutin / bulan</div></div><div class="input-wrap"><span>Rp</span><input class="input money" id="savingRoutine" type="number" min="0" step="1000" inputmode="numeric"></div></div>
+          <div class="form-row"><div><div class="label">Tabungan dana darurat / bulan</div></div><div class="input-wrap"><span>Rp</span><input class="input money" id="emergencySaving" type="number" min="0" step="1000" inputmode="numeric"></div></div>
+          <div class="form-row"><div><div class="label">Tabungan tujuan jangka pendek / bulan</div></div><div class="input-wrap"><span>Rp</span><input class="input money" id="goalSaving" type="number" min="0" step="1000" inputmode="numeric"></div></div>
+        </form></div>
+        <div class="card"><h3>Hasil</h3><div class="result-list" style="margin-top:8px"><div class="result-line"><span>Total tabungan / bulan</span><span class="result-value" id="srTotal">—</span></div><div class="result-line"><span>Saving Ratio</span><span class="result-value" id="srRatio">—</span></div><div class="result-line"><span>Status</span><span id="srStatus" class="status neutral">BELUM ADA DATA</span></div><div class="result-line"><span>Skor</span><span class="result-value" id="srScore">—</span></div></div><div class="recommend" style="margin-top:12px" id="srRec">Isi pendapatan dan tabungan untuk melihat hasil.</div><div class="benchmark" style="margin-top:14px"><table><tr><th>Status</th><th>Benchmark</th></tr><tr><td>Kritis</td><td>&lt;5%</td></tr><tr><td>Waspada</td><td>5%–&lt;10%</td></tr><tr><td>Sehat</td><td>10%–&lt;20%</td></tr><tr><td>Sangat sehat</td><td>≥20%</td></tr></table></div></div>
+      </div>
+    </section>
+
+    <section id="investment" class="section">
+      <div class="section-head"><div><h2>5. Investment Ratio</h2><p>Total investasi rutin ÷ pendapatan bersih.</p></div></div>
+      <div class="grid grid-2">
+        <div class="card"><h3>Input</h3><form>
+          <div class="form-row"><div><div class="label">Pendapatan bersih / bulan</div></div><div class="input-wrap"><span>Rp</span><input class="input money" id="irIncome" type="number" min="0" step="1000" inputmode="numeric"></div></div>
+          <div class="form-row"><div><div class="label">Reksa dana / pasar uang / obligasi</div></div><div class="input-wrap"><span>Rp</span><input class="input money" id="bondInvestment" type="number" min="0" step="1000" inputmode="numeric"></div></div>
+          <div class="form-row"><div><div class="label">Saham / ETF / pasar modal</div></div><div class="input-wrap"><span>Rp</span><input class="input money" id="equityInvestment" type="number" min="0" step="1000" inputmode="numeric"></div></div>
+          <div class="form-row"><div><div class="label">Emas / investasi lain</div></div><div class="input-wrap"><span>Rp</span><input class="input money" id="otherInvestment" type="number" min="0" step="1000" inputmode="numeric"></div></div>
+        </form></div>
+        <div class="card"><h3>Hasil</h3><div class="result-list" style="margin-top:8px"><div class="result-line"><span>Total investasi / bulan</span><span class="result-value" id="irTotal">—</span></div><div class="result-line"><span>Investment Ratio</span><span class="result-value" id="irRatio">—</span></div><div class="result-line"><span>Status</span><span id="irStatus" class="status neutral">BELUM ADA DATA</span></div><div class="result-line"><span>Skor</span><span class="result-value" id="irScore">—</span></div></div><div class="recommend" style="margin-top:12px" id="irRec">Isi pendapatan dan investasi untuk melihat hasil.</div><div class="benchmark" style="margin-top:14px"><table><tr><th>Status</th><th>Benchmark</th></tr><tr><td>Kritis</td><td>&lt;5%</td></tr><tr><td>Waspada</td><td>5%–&lt;10%</td></tr><tr><td>Sehat</td><td>10%–&lt;20%</td></tr><tr><td>Sangat sehat</td><td>≥20%</td></tr></table></div></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="card">
+        <h3>Metodologi & catatan</h3>
+        <p class="muted" style="font-size:13px">Benchmark pada kalkulator mengikuti metodologi workbook yang Anda berikan untuk screening edukatif. Angka bukan diagnosis kesehatan finansial dan bukan rekomendasi produk investasi individual.</p>
+        <p class="muted" style="font-size:13px"><strong>Debt Ratio:</strong> OJK secara eksplisit memuat panduan agar total cicilan maksimal 30% dari penghasilan dalam materi edukasi konsumen. <a href="https://www.ojk.go.id/id/berita-dan-kegiatan/info-terkini/Documents/Pages/Buku-Saku-Cerdas-Mengelola-Keuangan/Buku_Saku_OJK_-_Bagi_Calon_Pengantin.pdf" target="_blank" rel="noopener">OJK — Buku Saku Cerdas Mengelola Keuangan</a></p>
+        <div class="source-list">
+          <a href="https://www.ojk.go.id/id/berita-dan-kegiatan/info-terkini/Documents/Pages/Buku-Saku-Cerdas-Mengelola-Keuangan/Buku_Saku_OJK_-_Bagi_Calon_Pengantin.pdf" target="_blank" rel="noopener">OJK — Buku Saku Cerdas Mengelola Keuangan</a>
+          <a href="https://sikapiuangmu.ojk.go.id/FrontEnd/images/FileDownload/571_Majalah%20Edukasi%20Konsumen%20Tw1%202024%20Final_compressed.pdf" target="_blank" rel="noopener">OJK / Sikapi Uangmu — Edukasi Konsumen 2024</a>
+          <a href="https://sikapiuangmu.ojk.go.id/FrontEnd/images/FileDownload/25_Buku_Perencanaan_Keuangan.pdf" target="_blank" rel="noopener">OJK / Sikapi Uangmu — Perencanaan Keuangan</a>
+        </div>
+        <div class="footer">Versi web mandiri · Perhitungan berjalan di perangkat pengguna · Review minimal 1× setahun atau saat pendapatan, utang, atau tujuan keuangan berubah.</div>
+      </div>
+    </section>
+    <div class="print-only"><p>Financial Health Check Indonesia — dicetak dari kalkulator web.</p></div>
+  </main>
+
+  <script>
+    const STORAGE_KEY = 'fhc-indonesia-v1';
+    const IDS = ['income','basic','cfDebt','lifestyle','other','cash','deposit','investment','property','vehicle','business','mortgage','vehicleLoan','consumerDebt','otherDebt','drIncome','drMortgage','drVehicle','drConsumer','srIncome','savingRoutine','emergencySaving','goalSaving','irIncome','bondInvestment','equityInvestment','otherInvestment'];
+
+    const $ = (id) => document.getElementById(id);
+    const n = (id) => Math.max(0, Number($(id)?.value || 0));
+    const moneyFmt = new Intl.NumberFormat('id-ID', {style:'currency',currency:'IDR',maximumFractionDigits:0});
+    const pctFmt = new Intl.NumberFormat('id-ID', {style:'percent',maximumFractionDigits:1,minimumFractionDigits:1});
+    const compactNum = new Intl.NumberFormat('id-ID', {maximumFractionDigits:0});
+
+    function formatRp(v){ return moneyFmt.format(Math.round(v)); }
+    function formatPct(v){ return pctFmt.format(v); }
+    function cleanText(v){ return String(v ?? '').replace(/[<>]/g,''); }
+
+    // Core calculation functions mirror the workbook formulas exactly for valid denominators.
+    function calcCashFlow(d){
+      const income=d.income, total=d.basic+d.cfDebt+d.lifestyle+d.other, surplus=income-total;
+      if(income<=0) return {total,surplus,ratio:null,status:'BELUM ADA DATA',score:null,rec:'Isi pendapatan bersih untuk menghitung cash flow.'};
+      const ratio=surplus/income;
+      let status,score,rec;
+      if(surplus<0){status='KRITIS';score=0;rec='Hentikan defisit dan lakukan restrukturisasi anggaran segera.'}
+      else if(ratio<0.1){status='WASPADA';score=40;rec='Bangun surplus dengan memangkas pengeluaran fleksibel dan/atau menaikkan pendapatan.'}
+      else if(ratio<0.2){status='SEHAT';score=75;rec='Kondisi cukup sehat; naikkan surplus menuju ≥20% secara bertahap.'}
+      else{status='SANGAT SEHAT';score=100;rec='Pertahankan disiplin cash flow dan alihkan surplus ke tujuan keuangan.'}
+      return {total,surplus,ratio,status,score,rec};
+    }
+    function calcNetWorth(d){
+      const assets=d.cash+d.deposit+d.investment+d.property+d.vehicle+d.business;
+      const liab=d.mortgage+d.vehicleLoan+d.consumerDebt+d.otherDebt;
+      const nw=assets-liab;
+      if(assets<=0) return {assets,liab,nw,ratio:null,status:'BELUM ADA DATA',score:null,rec:'Masukkan data aset dan kewajiban untuk menghitung net worth.'};
+      const ratio=nw/assets;
+      let status,score,rec;
+      if(nw<0){status='KRITIS';score=0;rec='Kurangi kewajiban dan bangun aset produktif hingga Net Worth positif.'}
+      else if(ratio<0.3){status='WASPADA';score=40;rec='Perkuat struktur aset dan kewajiban hingga Net Worth Ratio minimal 30%.'}
+      else if(ratio<0.5){status='SEHAT';score=75;rec='Pertahankan pertumbuhan aset dan kendalikan penambahan kewajiban.'}
+      else{status='SANGAT SEHAT';score=100;rec='Fondasi neraca kuat; fokus pada proteksi dan tujuan jangka panjang.'}
+      return {assets,liab,nw,ratio,status,score,rec};
+    }
+    function calcDebtRatio(d){
+      const total=d.drMortgage+d.drVehicle+d.drConsumer;
+      if(d.drIncome<=0) return {total,ratio:null,status:'BELUM ADA DATA',score:null,rec:'Isi pendapatan bersih untuk menghitung Debt Ratio.'};
+      const ratio=total/d.drIncome;
+      let status,score,rec;
+      if(ratio>0.4){status='KRITIS';score=0;rec='Prioritaskan penghentian utang baru dan rencana penurunan cicilan/utang.'}
+      else if(ratio>0.3){status='WASPADA';score=40;rec='Kurangi utang konsumtif dan hindari menambah cicilan sampai rasio ≤30%.'}
+      else if(ratio>0.2){status='SEHAT';score=75;rec='Masih terkendali; pertahankan cicilan dan percepat pelunasan utang mahal.'}
+      else{status='SANGAT SEHAT';score=100;rec='Beban utang sangat sehat; jaga agar tidak meningkat.'}
+      return {total,ratio,status,score,rec};
+    }
+    function calcRatio(income, total, kind){
+      if(income<=0) return {total,ratio:null,status:'BELUM ADA DATA',score:null,rec:'Isi pendapatan bersih untuk menghitung rasio.'};
+      const ratio=total/income;
+      let status,score,rec;
+      if(ratio<0.05){status='KRITIS';score=0;rec=kind==='saving'?'Mulai menabung otomatis minimal 5% dan fokus membangun dana darurat.':'Mulai investasi setelah kebutuhan dasar dan dana darurat ditata.'}
+      else if(ratio<0.1){status='WASPADA';score=40;rec=kind==='saving'?'Naikkan tabungan bertahap menuju ≥10% dari pendapatan.':'Naikkan investasi bertahap menuju ≥10% dengan strategi otomatis.'}
+      else if(ratio<0.2){status='SEHAT';score=75;rec=kind==='saving'?'Kondisi sehat; arahkan sebagian tambahan ke tujuan jangka panjang.':'Sudah sehat; pastikan diversifikasi dan kesesuaian dengan tujuan.'}
+      else{status='SANGAT SEHAT';score=100;rec=kind==='saving'?'Pertahankan tingkat tabungan dan pastikan alokasinya efisien.':'Investasi kuat; review alokasi aset dan lakukan rebalancing berkala.'}
+      return {total,ratio,status,score,rec};
+    }
+
+    function readData(){
+      const d={}; IDS.forEach(id=>d[id]=n(id)); return d;
+    }
+    function setVal(id,v){ $(id).value=(v===0 || v===null || v===undefined)?'':v; }
+    function applyData(d){ IDS.forEach(id=>setVal(id, Number(d?.[id]||0))); update(); }
+    function statusClass(status){ if(status==='KRITIS') return 'critical'; if(status==='WASPADA') return 'watch'; if(status==='SEHAT'||status==='SANGAT SEHAT') return 'healthy'; return 'neutral'; }
+    function setStatus(el,status){ el.textContent=status; el.className='status '+statusClass(status); }
+    function update(){
+      const d=readData();
+      const cf=calcCashFlow(d), nw=calcNetWorth(d), dr=calcDebtRatio(d);
+      const sr=calcRatio(d.srIncome,d.savingRoutine+d.emergencySaving+d.goalSaving,'saving');
+      const ir=calcRatio(d.irIncome,d.bondInvestment+d.equityInvestment+d.otherInvestment,'investment');
+      renderCash(cf); renderNet(nw); renderDebt(dr); renderRatio(sr,'sr'); renderRatio(ir,'ir'); renderDashboard(cf,nw,dr,sr,ir);
+      saveLocal(d);
+    }
+    function renderCash(x){ $('cfTotal').textContent=formatRp(x.total); $('cfSurplus').textContent=x.surplus===0 && !x.ratio ? '—' : formatRp(x.surplus); $('cfRatio').textContent=x.ratio===null?'—':formatPct(x.ratio); setStatus($('cfStatus'),x.status); $('cfScore').textContent=x.score===null?'—':x.score+'/100'; $('cfRec').textContent=x.rec; }
+    function renderNet(x){ $('nwAssets').textContent=formatRp(x.assets); $('nwLiab').textContent=formatRp(x.liab); $('nwValue').textContent=x.assets===0?'—':formatRp(x.nw); $('nwRatio').textContent=x.ratio===null?'—':formatPct(x.ratio); setStatus($('nwStatus'),x.status); $('nwScore').textContent=x.score===null?'—':x.score+'/100'; $('nwRec').textContent=x.rec; }
+    function renderDebt(x){ $('drTotal').textContent=formatRp(x.total); $('drRatio').textContent=x.ratio===null?'—':formatPct(x.ratio); setStatus($('drStatus'),x.status); $('drScore').textContent=x.score===null?'—':x.score+'/100'; $('drRec').textContent=x.rec; }
+    function renderRatio(x,p){ $(p+'Total').textContent=formatRp(x.total); $(p+'Ratio').textContent=x.ratio===null?'—':formatPct(x.ratio); setStatus($(p+'Status'),x.status); $(p+'Score').textContent=x.score===null?'—':x.score+'/100'; $(p+'Rec').textContent=x.rec; }
+    function renderDashboard(...xs){
+      const [cf,nw,dr,sr,ir]=xs, all=[cf,nw,dr,sr,ir], valid=all.filter(x=>x.score!==null);
+      const score=valid.length?Math.round(valid.reduce((a,x)=>a+x.score,0)/valid.length):null;
+      $('overallScore').textContent=score===null?'—':score;
+      $('scoreRing').style.setProperty('--p', score===null?0:score);
+      const status=score===null?'BELUM ADA DATA':score<50?'KRITIS':score<70?'WASPADA':score<85?'SEHAT':'SANGAT SEHAT';
+      setStatus($('overallPill'),status); $('overallStatus').textContent=status==='BELUM ADA DATA'?'Belum ada data':status;
+      $('overallMessage').textContent=score===null?'Isi pendapatan bersih dan data keuangan Anda untuk melihat hasil.':(score<50?'Fokus pada arus kas, utang, dan fondasi keuangan sebelum mengejar pertumbuhan aset.':score<70?'Ada area perlu diperbaiki; prioritaskan indikator KRITIS lalu WASPADA.':score<85?'Fondasi cukup sehat; tingkatkan ketahanan dan konsistensi investasi.':'Fondasi kuat; fokus pada optimasi investasi, proteksi, dan tujuan jangka panjang.');
+      const cfg=[['Cash',cf,'barCash'],['Net',nw,'barNet'],['Debt',dr,'barDebt'],['Saving',sr,'barSaving'],['Investment',ir,'barInvestment']]; cfg.forEach(([name,x,bar])=>{ $('dash'+name).textContent=x.ratio===null?'—':formatPct(x.ratio); $('dash'+name+'Score').textContent='Skor '+(x.score===null?'—':x.score); $(bar).style.width=(x.score===null?0:x.score)+'%'; });
+    }
+    function saveLocal(d){ try{localStorage.setItem(STORAGE_KEY,JSON.stringify({version:1,updatedAt:new Date().toISOString(),data:d}));}catch(e){} }
+    function loadLocal(){ try{const raw=localStorage.getItem(STORAGE_KEY); if(!raw)return; const parsed=JSON.parse(raw); if(parsed?.data) applyData(parsed.data);}catch(e){} }
+    function resetAll(){ IDS.forEach(id=>setVal(id,0)); update(); try{localStorage.removeItem(STORAGE_KEY)}catch(e){} }
+
+    IDS.forEach(id=>$(id).addEventListener('input',update));
+    $('resetBtn').addEventListener('click',()=>{if(confirm('Reset seluruh data pada perangkat ini?')) resetAll();});
+    $('printBtn').addEventListener('click',()=>window.print());
+    loadLocal(); update();
+
+    // Expose pure calculator for automated tests and integrations.
+    window.FHC = {calcCashFlow,calcNetWorth,calcDebtRatio,calcRatio};
+  </script>
+</body>
+</html>
